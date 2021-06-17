@@ -1,5 +1,7 @@
 package com.kayenterprise;
 
+import com.kayenterprise.exceptions.ImageNotFoundException;
+
 import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
@@ -13,14 +15,6 @@ public class GUIChecker {
     private static boolean isRunning = Boolean.TRUE;
 
     public static void main(String[] args) {
-        try {
-            UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-        } catch (UnsupportedLookAndFeelException | IllegalAccessException | InstantiationException | ClassNotFoundException ex) {
-            ex.printStackTrace();
-        }
-
-        UIManager.put("swing.boldMetal", Boolean.FALSE);
-
         MenuEntity menu = new MenuEntity();
 
         createAndShowGUI(menu);
@@ -37,7 +31,7 @@ public class GUIChecker {
             return;
         }
 
-        menu.setTrayIcon(new TrayIcon(createImage(ICO_PATH, "tray icon")));
+        menu.setTrayIcon(new TrayIcon(createImage()));
         menu.setPopupMenu(new PopupMenu());
         menu.setSystemTray(SystemTray.getSystemTray());
         menu.setTempItem(new MenuItem("Temperatures"));
@@ -74,14 +68,14 @@ public class GUIChecker {
         menu.getTempItem().setLabel(cardsAndTemperatures);
     }
 
-    protected static Image createImage(String path, String description) {
-        URL urlIcon = GUIChecker.class.getResource(path);
+    protected static Image createImage() {
+        URL urlIcon = GUIChecker.class.getResource(GUIChecker.ICO_PATH);
 
         if (urlIcon == null) {
-            System.err.println("Resource not found: " + path);
-            return null;
+            System.err.println("Resource not found: " + GUIChecker.ICO_PATH);
+            throw new ImageNotFoundException(GUIChecker.ICO_PATH);
         } else {
-            return (new ImageIcon(String.valueOf(urlIcon), description)).getImage();
+            return (new ImageIcon(String.valueOf(urlIcon), "tray icon")).getImage();
         }
     }
 

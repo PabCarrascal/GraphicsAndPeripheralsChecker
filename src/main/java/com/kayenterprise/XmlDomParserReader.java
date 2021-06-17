@@ -18,12 +18,9 @@ public class XmlDomParserReader {
     private static final String NVIDIA_GET_GPUS_COMMAND = "nvidia-smi -L";
     private static final String NVIDIA_GET_TEMP_COMMAND = "nvidia-smi -q -i 0 -x -f " + FILE_PATCH + " --dtd";
 
-    public static void main(String[] args) {
-        getGPUsWithNvidiaCommand();
-    }
-
-    private static void getGPUsWithNvidiaCommand() {
+    public static String getGPUsWithNvidiaCommand() {
         BufferedReader br = null;
+        StringBuilder gpuTemp = new StringBuilder();
         try {
             // get a list of gpus
             Process process = Runtime.getRuntime().exec(NVIDIA_GET_GPUS_COMMAND);
@@ -34,7 +31,7 @@ public class XmlDomParserReader {
                 gpuName = line.substring(7, line.indexOf("(")-1);
                 filename = FILENAME + count++ + ".xml";
                 generateXMLWithNvidiaCommand(filename);
-                System.out.println(gpuName + "@" + getGpuTemperatureFromXML(filename));
+                gpuTemp.append(gpuName).append(" - ").append(getGpuTemperatureFromXML(filename));
                 deleteTempFile(filename);
             }
         } catch (Exception e) {
@@ -46,6 +43,7 @@ public class XmlDomParserReader {
                 e.printStackTrace();
             }
         }
+        return gpuTemp.toString();
     }
 
     private static void generateXMLWithNvidiaCommand(String fileName) {
@@ -53,7 +51,7 @@ public class XmlDomParserReader {
             // generate xml file
             Runtime.getRuntime().exec(NVIDIA_GET_TEMP_COMMAND.replace(FILE_PATCH, fileName));
             // wait for the file to be created
-            Thread.sleep(150);
+            Thread.sleep(200);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -79,7 +77,7 @@ public class XmlDomParserReader {
 
             // return the temperature without ºC and spaces
             return doc.getElementsByTagName(gpuTempNode).item(0).getTextContent().replace('C', ' ').trim();
-        } catch (ParserConfigurationException | SAXException | IOException e) {
+        } catch (Exception e) {
             // return 0 instead of errors
             return "0";
         }

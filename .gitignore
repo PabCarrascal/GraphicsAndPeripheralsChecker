@@ -1,6 +1,8 @@
 # IntelliJ files
 .idea
 out
+# Temp xml files
+*.xml
 
 # Compiled class file
 *.class
